@@ -61,7 +61,14 @@ contrFilter <- contributions %>%
 
 #joining contributions and candidates
 canCon <- candFilter %>%
-  inner_join(contrFilter, by = "cand_id")
+  full_join(contrFilter, candFilter, by = "cand_id")
+
+# organizing canCon to show what we want
+# this is the new data set that has no na's in the cand_name slot 
+canCon <- canCon %>%
+  arrange(cand_id) %>%
+  filter(!is.na(cand_name)) %>%
+  group_by(cand_name)
 
 View(canCon)
 ```
