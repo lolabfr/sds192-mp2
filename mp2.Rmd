@@ -1,7 +1,7 @@
 ---
 title: "Mini-Project 2"
-author: "Your Name Here"
-date: "October 31, 2017"
+author: "Beth Campbell, Lola Roberts and Felicia Villalobos"
+date: "March 22, 2018"
 output: html_document
 ---
 
@@ -18,42 +18,52 @@ load("contributions.rda")
 ```
 
 ```{r}
-newCandidates <- candidates %>%
-  filter(cand_id == "H0AK00097" | cand_id == "H0DE01033" | cand_id == "H0MT00074" | cand_id == "H0ND00135" | cand_id == "H0ND01026") %>%
-  left_join()
-```
-
-```{r}
 library(tidyverse)
 library(ggplot2)
 ```
 
 ```{r}
-#join comtributions and candidates (both have cand_id)
-#now will have cand name, org, transaction amount $
-#then filter out the negative transation amounts 
-
-test1 <- contributions %>%
-  filter(transaction_amt > 0) %>%
-  select(cand_id, transaction_amt, tran_id)
-  
-test2 <- candidates %>%
-  select(cand_id, cand_name, cand_election_yr, cand_party_affiliation)
-
-comfilter <- committees %>%
-  select(cand_id, cmte_name, cmte_type)
-
+# #join comtributions and candidates (both have cand_id)
+# #now will have cand name, org, transaction amount $
+# #then filter out the negative transation amounts 
+# 
+# test1 <- contributions %>%
+#   filter(transaction_amt > 0) %>%
+#   select(cand_id, transaction_amt, tran_id)
+#   
+# test2 <- candidates %>%
+#   select(cand_id, cand_name, cand_election_yr, cand_party_affiliation)
+# 
+# comfilter <- committees %>%
+#   select(cand_id, cmte_name, cmte_type)
 ```
+
 ```{r}
 #trying to join the above stuff 
 
-newthing <- test1 %>%
-  inner_join(test2, by = "cand_id")
+# newthing <- test1 %>%
+#   inner_join(test2, by = "cand_id")
 
 #newerthing <- comfilter %>% 
  # filter(cand_id as NA) %>%
   #will have all contributions that went to candidate committee
   #inner_join(newthing, by = "cand_id")
+```
+
+```{r}
+# what we want from candidates
+candFilter <- candidates %>%
+  select(cand_id, cand_name, cand_party_affiliation)
+
+# what we want from contributions
+contrFilter <- contributions %>%
+  select(cmte_id, name, state, transaction_amt, cand_id)
+
+#joining contributions and candidates
+canCon <- candFilter %>%
+  inner_join(contrFilter, by = "cand_id")
+
+View(canCon)
 ```
 
 
