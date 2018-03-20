@@ -56,10 +56,4 @@ newthing <- test1 %>%
   #inner_join(newthing, by = "cand_id")
 ```
 
-```{r}
-
-myplot <- ggplot(newthing, aes(cand_name, transaction_amt)) + geom_point()
-
-myplot
-```
 
