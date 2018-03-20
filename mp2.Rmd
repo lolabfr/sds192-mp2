@@ -5,16 +5,62 @@ date: "October 31, 2017"
 output: html_document
 ---
 
+```{r}
+library(tidyverse)
+```
 
-## Loading the data
-
-This project is so interesting and relevant to my life!
 
 ```{r, include=FALSE}
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
-
-head
 ```
+
+```{r}
+newCandidates <- candidates %>%
+  filter(cand_id == "H0AK00097" | cand_id == "H0DE01033" | cand_id == "H0MT00074" | cand_id == "H0ND00135" | cand_id == "H0ND01026") %>%
+  left_join()
+```
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+```{r}
+#join comtributions and candidates (both have cand_id)
+#now will have cand name, org, transaction amount $
+#then filter out the negative transation amounts 
+
+test1 <- contributions %>%
+  filter(transaction_amt > 0) %>%
+  select(cand_id, transaction_amt, tran_id)
+  
+test2 <- candidates %>%
+  select(cand_id, cand_name, cand_election_yr, cand_party_affiliation)
+
+comfilter <- committees %>%
+  select(cand_id, cmte_name, cmte_type)
+
+```
+```{r}
+#trying to join the above stuff 
+
+newthing <- test1 %>%
+  inner_join(test2, by = "cand_id")
+
+#newerthing <- comfilter %>% 
+ # filter(cand_id as NA) %>%
+  #will have all contributions that went to candidate committee
+  #inner_join(newthing, by = "cand_id")
+```
+
+```{r}
+#do some plotting? 
+
+myplot <- ggplot(newthing, aes(cand_name, transaction_amt)) + geom_point()
+
+myplot
+```
+
