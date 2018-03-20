@@ -57,7 +57,6 @@ newthing <- test1 %>%
 ```
 
 ```{r}
-#do some plotting? 
 
 myplot <- ggplot(newthing, aes(cand_name, transaction_amt)) + geom_point()
 
