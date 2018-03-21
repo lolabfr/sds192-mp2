@@ -53,7 +53,7 @@ library(ggplot2)
 ```{r}
 # what we want from candidates
 candFilter <- candidates %>%
-  select(cand_id, cand_name, cand_party_affiliation)
+  select(cand_id, cand_name, cand_party_affiliation, cand_state)
 
 # what we want from contributions
 contrFilter <- contributions %>%
@@ -66,11 +66,23 @@ canCon <- candFilter %>%
 # organizing canCon to show what we want
 # this is the new data set that has no na's in the cand_name slot 
 canCon <- canCon %>%
-  arrange(cand_id) %>%
-  filter(!is.na(cand_name)) %>%
-  group_by(cand_name)
+  filter(!is.na(cand_name),
+         !is.na(cmte_id),
+         !is.na(name),
+         !is.na(state),
+         !is.na(transaction_amt),
+         transaction_amt > 0) %>%
+  arrange(cand_name)
 
 View(canCon)
+
+canCon2 <- canCon %>%
+  group_by(cand_name, cand_state) %>%
+  summarize(totalContributionCandidate = sum(transaction_amt)) %>%
+  arrange(desc(totalContributionCandidate)) %>%
+  head(10)
+
+View(canCon2)
 ```
 
 
