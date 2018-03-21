@@ -74,7 +74,7 @@ canCon <- canCon %>%
          transaction_amt > 0) %>%
   arrange(cand_name)
 
-View(canCon)
+#View(canCon)
 
 canCon2 <- canCon %>%
   group_by(cand_name, cand_state) %>%
@@ -82,7 +82,14 @@ canCon2 <- canCon %>%
   arrange(desc(totalContributionCandidate)) %>%
   head(10)
 
-View(canCon2)
+#View(canCon2)
+```
+
+```{r}
+candVs.Money <- ggplot(canCon2, aes(x = cand_name, y = totalContributionCandidate, fill = cand_state)) + 
+geom_bar(stat = "identity")
+
+candVs.Money
 ```
 
 
