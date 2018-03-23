@@ -86,12 +86,13 @@ houseCandContrib <- houseCandid %>%
 
 ```{r}
 # writing a function for the graphs, so we don't have the same code repeated
-graph <- function(dataSet, xElement, yElement, fillElement, yAxisLab) {
+graph <- function(dataSet, xElement, yElement, fillElement, yAxisLab, legendTitle) {
   ggplot(dataSet, aes(x = xElement, y = yElement, fill = fillElement)) + 
     geom_bar(stat = "identity") + 
     theme(axis.text.x = element_text(size = rel(0.7), angle = 70, hjust = 1)) +
     xlab("Candidates") + 
-    ylab(yAxisLab)
+    ylab(yAxisLab) + 
+    guides(fill = guide_legend(title = legendTitle))
 }
 ```
 
@@ -99,7 +100,7 @@ graph <- function(dataSet, xElement, yElement, fillElement, yAxisLab) {
 ```{r, message=FALSE, warning=FALSE}
 #graphic showing candidate vs. total contribution
 candVs.Money <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$totalContributionCandidate,
-                      houseCandContrib$cand_state, "Total Contribution\n(Millions)") + 
+                      houseCandContrib$cand_state, "Total Contribution\n(Millions)", "Candidate Origin State") + 
   scale_y_continuous(breaks = c(0e+00, 2e+06, 4e+06, 6e+06),
                      labels = c(0, 2, 4, 6)) +
   ggtitle("Candidates vs. Total Contribution")
@@ -110,7 +111,7 @@ candVs.Money
 This data graphic would be a good comparison to the last one in order to see how many votes each candidate got in comparison to the amount of money was spent on them. This data is for the same 10 candidates as in the previous graphic. These two data graphics are meant to help us try to find a possible correlation between the amount of money contributed to campaign (either for it or against it) and its effect on the number of general votes. For example, if a candidate has had more money spent on them but, fewer general votes, then maybe we can infer that the money spent was used against their campaign (ex. For a negative ad against a candidate that, in turn, influenced voters).   
 
 ```{r, message=FALSE, warning=FALSE}
-candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)") +
+candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)", "Loss/Win") +
   scale_y_continuous(breaks = c(0e+00, 1e+08, 2e+08, 3e+08),
                      labels = c(0, 1, 2, 3)) +
   ggtitle("Candidates vs. General Votes")
@@ -120,7 +121,7 @@ candVs.Vote
 
 Our third graphic displays the total number of contributions that the same top ten candidates received. In the graphic we separate the number of contributions that each candidate received by where the contribution came from as described above. We also separated the candidates by which party they are affiliated with in order to see if there’s a correlation between how many contributions they received, where those contributions came from, and what party the candidate is affiliated with. From this data graphic, we can see that the majority of the contributions a candidate receives is not affiliated with a major party and that a candidate receives more contributions from the party it’s affiliated with than the opposing party.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, fig.width= 50, fig.height= 25}
 # candVs.Contribution <- graph(houseCandContrib$contributionParty, houseCandContrib$candidateParty, "Total Number of Contributions")
 # 
 # candVs.Contribution
@@ -131,7 +132,7 @@ Republican = c(62, 76, 80, 66, 25, 6, 77, 73, 67, 10)
 
 Other = c(923, 821, 842, 631, 1801, 426, 861, 1043, 664, 666)
 
-candidateName = c("Biggert, Judy", "Bilbray, Brian Phillip", "Canseco, Francisco Raul Quico R.", "Cravaack, Raymond J Mr.", "Critz, Mark", "Duckworth, L. Tammy", " Lungren, Daniel E.", "Renacci, James B.", "Schilling, Robert T.", "Shutton, Betty S.")
+candidateName = c("Biggert, Judy", "Bilbray, Brian", "Canseco, Francisco", "Cravaack, Raymond", "Critz, Mark", "Duckworth, Tammy", " Lungren, Daniel ", "Renacci, James ", "Schilling, Robert ", "Shutton, Betty S")
 
 candidateParty = c("R", "R", "R", "R", "D", "D", "R", "R", "R", "D" )
 
@@ -146,10 +147,16 @@ canDemParty <- party %>%
 
 # creating the bar graph for candidates vs. the party they recieved money from
 
-candDemVs.Contribution <- graph(canDemParty, canDemParty$candidateName, canDemParty$numberOfContributions, canDemParty$party, "Number of Contributions") + 
+candDemVs.Contribution <- graph(canDemParty, canDemParty$candidateName, canDemParty$numberOfContributions, canDemParty$party, "Number of Contributions", "Candidate Party Affiliation") + 
   ggtitle("Democatic Candidate vs.\n Number of Contributions By Party") + 
   scale_fill_manual(values=c(Democratic="blue", Republican="red", Other = "grey")) + 
-  theme(legend.position="none")
+  theme(legend.position="none") + 
+  theme(plot.title = element_text(size = 70, face = "bold")) + 
+  theme(axis.text.x = element_text(size = rel(5))) + 
+  theme(axis.text.y = element_text(size = rel(5))) + 
+  theme(axis.ticks.length = unit(1.5, "lines")) + 
+  theme(axis.title.x = element_text(size = 50, face = "bold"))+
+  theme(axis.title.y = element_text(size = 50, face = "bold"))
 
 # candDemVs.Contribution
 
@@ -158,10 +165,22 @@ canRepParty <- party %>%
   gather(party, numberOfContributions, -candidateName, -candidateParty) %>%
   filter(candidateParty == "R")
 
-candRepVs.Contribution <- graph(canRepParty, canRepParty$candidateName, canRepParty$numberOfContributions, canRepParty$party, "") + 
+candRepVs.Contribution <- graph(canRepParty, canRepParty$candidateName, canRepParty$numberOfContributions, canRepParty$party, "", "Candidate Party\n Affiliation") + 
   ggtitle("Republican Candidate vs.\n Number of Contributions By Party") + 
   scale_fill_manual(values=c(Democratic="blue", Republican="red", Other = "grey")) + 
-  scale_y_continuous(breaks = c(0, 500, 1000, 1500, 2000))
+  scale_y_continuous(breaks = c(0, 500, 1000, 1500, 2000)) + ylim(0, 2000) +
+  theme(legend.position = c(0, .7)) + 
+  theme(plot.title = element_text(size = 70, face = "bold")) + 
+  theme(axis.text.x = element_text(size = rel(5))) + 
+  theme(axis.text.y = element_text(size = rel(0))) +
+  theme(axis.ticks.y = element_blank()) +
+  theme(axis.ticks.length = unit(1.5, "lines")) + 
+  theme(axis.title.x = element_text(size = 50, face = "bold")) + 
+  theme(legend.title = element_text(size = rel(5))) + 
+  theme(legend.text = element_text(size = rel(5))) + 
+  guides(fill = guide_legend(keywidth = 3,
+                             keyheight = 5,
+                             title = "Contribution Affiliation"))
 
 # candRepVs.Contribution
 
