@@ -40,34 +40,48 @@ houseElection <- house_elections %>%
 contrFilter <- contributions %>%
   select(cmte_id, name, state, transaction_amt, cand_id)
 
+# what we want from committees
+committeeFilter <- committees %>%
+  select(cmte_id, cmte_name, cmte_party_affiliation, cmte_type, org_type)
+
+#joining the data set of committe to contributions
+committeContribution <- contrFilter %>%
+  full_join(committeeFilter, contrFilter, by = "cmte_id")
+
 # joining the data set of candidate and house election 
 houseCandid <- houseElection %>%
   full_join(candidateSelection, houseElection, by = c("fec_id" = "cand_id"))
 
 # joing the previous joined data set with contributions and editing the data set to show what we want
 houseCandContrib <- houseCandid %>%
-  inner_join(contrFilter, houseCandid, by = c("fec_id" = "cand_id")) %>%
+  inner_join(committeContribution, houseCandid, by = c("fec_id" = "cand_id")) %>%
   filter(!is.na(cand_name),
          !is.na(cmte_id),
          !is.na(name),
          !is.na(transaction_amt),
          !is.na(general_votes),
          transaction_amt > 0) %>%
-  mutate(ge_winner = ifelse(ge_winner == "W", 1, 0)) %>%
+  mutate(ge_winner = ifelse(ge_winner == "W", 1, 0),
+         contrParty = ifelse(cmte_party_affiliation == "REP", 1,
+                            ifelse(cmte_party_affiliation == "DEM", 1, 1)),
+         candParty = ifelse(cand_party_affiliation == "REP", 1,
+                            ifelse(cand_party_affiliation == "DEM", 1000, 0))) %>%
   group_by(cand_name, cand_state) %>%
   summarize(totalContributionCandidate = sum(transaction_amt),
             general_votes = sum(general_votes),
-            ge_winner = sum(ge_winner)) %>%
-  mutate(ge_winner = ifelse(ge_winner > 1, "Win", "Lose")) %>%
+            ge_winner = sum(ge_winner),
+            contributionParty = sum(contrParty),
+            candidateParty = sum(candParty)) %>%
+  mutate(ge_winner = ifelse(ge_winner > 1, "Win", "Lose"),
+         candidateParty = ifelse(candidateParty > 2000, "Dem", "Rep")) %>%
   arrange(desc(totalContributionCandidate)) %>%
   head(10)
-
 ```
 
 ```{r}
 # writing a function for the graphs, so we don't have the same code repeated
-graph <- function(yElement, fillElement, yAxisLab) {
-  ggplot(houseCandContrib, aes(x = cand_name, y = yElement, fill = fillElement)) + 
+graph <- function(dataSet, xElement, yElement, fillElement, yAxisLab) {
+  ggplot(dataSet, aes(x = xElement, y = yElement, fill = fillElement)) + 
     geom_bar(stat = "identity") + 
     theme(axis.text.x = element_text(size = rel(0.7), angle = 70, hjust = 1)) +
     xlab("Candidates") + 
@@ -78,7 +92,7 @@ graph <- function(yElement, fillElement, yAxisLab) {
 
 ```{r, message=FALSE, warning=FALSE}
 #graphic showing candidate vs. total contribution
-candVs.Money <- graph(houseCandContrib$totalContributionCandidate,
+candVs.Money <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$totalContributionCandidate,
                       houseCandContrib$cand_state, "Total Contribution\n(Millions)") + 
   scale_y_continuous(breaks = c(0e+00, 2e+06, 4e+06, 6e+06),
                      labels = c(0, 2, 4, 6)) +
@@ -90,11 +104,43 @@ candVs.Money
 This data graphic would be a good comparison to the last one in order to see how many votes each candidate got in comparison to the amount of money was spent on them. This data is for the same 10 candidates as in the previous graphic. These two data graphics are meant help us try to find a possible correlation between the amount of money contributed to campaign (either for it or against it) and its effect on the number of general votes. For example, if a candidate has had more money spent on them but, fewer general votes, then maybe we can infer that the money spent was used against their campaign (ex. For a negative ad against a candidate that in turn influenced voters)  
 
 ```{r, message=FALSE, warning=FALSE}
-candVs.Vote <- graph(houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)") +
+candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)") +
   scale_y_continuous(breaks = c(0e+00, 1e+08, 2e+08, 3e+08),
                      labels = c(0, 1, 2, 3)) +
   ggtitle("Candidates vs. General Votes")
 
 candVs.Vote
+```
+
+```{r}
+# candVs.Contribution <- graph(houseCandContrib$contributionParty, houseCandContrib$candidateParty, "Total Number of Contributions")
+# 
+# candVs.Contribution
+
+Democratic = c(15, 30, 22, 10, 96, 65, 15, 15, 30, 91)
+
+Republican = c(62, 76, 80, 66, 25, 6, 77, 73, 67, 10)
+
+Other = c(923, 821, 842, 631, 1801, 426, 861, 1043, 664, 666)
+
+candidateName = c("Biggert, Judy", "Bilbray, Brian Phillip", "Canseco, Francisco Raul Quico R.", "Cravaack, Raymond J Mr.", "Critz, Mark", "Duckworth, L. Tammy", " Lungren, Daniel E.", "Renacci, James B.", "Schilling, Robert T.", "Shutton, Betty S.")
+
+candidateParty = c("R", "R", "R", "R", "D", "D", "R", "R", "R", "D" )
+
+candParty <- houseCandContrib %>%
+  select(candidateParty)
+
+party = data_frame(Democratic, Republican, Other, candidateName, candidateParty)
+
+party <- party %>%
+  gather(party, numberOfContributions, -candidateName, -candidateParty) 
+
+# creating the bar graph for candidates vs. the party they recieved money from
+
+candVs.Contribution <- graph(party, party$candidateName, party$numberOfContributions, party$party, "Number of Contributions") + 
+  ggtitle("Candidate vs. Number of Contributions By Party")
+candVs.Contribution
+
+
 ```
 

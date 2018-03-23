@@ -167,27 +167,41 @@ houseElection &lt;- house_elections %&gt;%
 contrFilter &lt;- contributions %&gt;%
   select(cmte_id, name, state, transaction_amt, cand_id)
 
+# what we want from committees
+committeeFilter &lt;- committees %&gt;%
+  select(cmte_id, cmte_name, cmte_party_affiliation, cmte_type, org_type)
+
+#joining the data set of committe to contributions
+committeContribution &lt;- contrFilter %&gt;%
+  full_join(committeeFilter, contrFilter, by = &quot;cmte_id&quot;)
+
 # joining the data set of candidate and house election 
 houseCandid &lt;- houseElection %&gt;%
   full_join(candidateSelection, houseElection, by = c(&quot;fec_id&quot; = &quot;cand_id&quot;))
 
 # joing the previous joined data set with contributions and editing the data set to show what we want
 houseCandContrib &lt;- houseCandid %&gt;%
-  inner_join(contrFilter, houseCandid, by = c(&quot;fec_id&quot; = &quot;cand_id&quot;)) %&gt;%
+  inner_join(committeContribution, houseCandid, by = c(&quot;fec_id&quot; = &quot;cand_id&quot;)) %&gt;%
   filter(!is.na(cand_name),
          !is.na(cmte_id),
          !is.na(name),
          !is.na(transaction_amt),
          !is.na(general_votes),
          transaction_amt &gt; 0) %&gt;%
-  mutate(ge_winner = ifelse(ge_winner == &quot;W&quot;, 1, 0)) %&gt;%
+  mutate(ge_winner = ifelse(ge_winner == &quot;W&quot;, 1, 0),
+         contrParty = ifelse(cmte_party_affiliation == &quot;REP&quot;, 1,
+                            ifelse(cmte_party_affiliation == &quot;DEM&quot;, 2,
+                                   ifelse(cmte_party_affiliation == &quot;IND&quot;, 3, 0)))) %&gt;%
   group_by(cand_name, cand_state) %&gt;%
   summarize(totalContributionCandidate = sum(transaction_amt),
             general_votes = sum(general_votes),
-            ge_winner = sum(ge_winner)) %&gt;%
+            ge_winner = sum(ge_winner),
+            contributionParty = sum(contrParty)) %&gt;%
   mutate(ge_winner = ifelse(ge_winner &gt; 1, &quot;Win&quot;, &quot;Lose&quot;)) %&gt;%
   arrange(desc(totalContributionCandidate)) %&gt;%
-  head(10)</code></pre>
+  head(10)
+
+# View (houseCandContrib)</code></pre>
 <pre class="r"><code># writing a function for the graphs, so we don't have the same code repeated
 graph &lt;- function(yElement, fillElement, yAxisLab) {
   ggplot(houseCandContrib, aes(x = cand_name, y = yElement, fill = fillElement)) + 
