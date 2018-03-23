@@ -8,7 +8,7 @@ output:
     
 ---
 
-For this project, we analyzed the FEC data files for the 2011-2012 election cycle. We used information about the candidates, contributions, house elections, and committees to create a visualization about how much money was spent on candidates overall during this cycle. We then use another graphic to visualize where that money came from, an organization affiliated with the democratic party, the republican party, or other (another party or an organization not associated with a party). For these visualizations, we have used the ten candidates that have had the most money spent on them in the House elections during this cycle.
+The amount of money a candidate’s campaign receives may widely influence whether they win or lose the election. Campaign fundraising has become such a large part of the democratic process that candidates running for high office must spend the majority of their time in office just raising money for their re-election. Contributions have gotten so out of hand that the Federal Election Commission has had to limit the amount of money people can contribute in order to strive for a level playing field. How much money do candidates actually receive and will large amounts of money swing the outcome of an election? Also how far will the other party go in terms of spending money against an opposing candidate?
 
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -23,11 +23,7 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-The first graphic shows the total contributions (in millions of dollars) that a candidate received and also shows the state where the candidate is from. We found the total amount of money spent on each candidate by joining together the candidates dataset and contributions dataset (full_join).
-
-This data may be misleading because we have summed all of the money spent candidates without a distinction of whether the contribution was used for or against them. 
-
-Before joining we selected columns from each dataset with relevant information and to speed up the joining process as to not overload the RStudio system. Once we joined them, we filtered out all of the information with NA to make our dataset more clear and easier to understand. From there we grouped by candidate name and state so that we could see the total amount they received. In order to see the candidate that received the largest total amount of contributions at the top of the dataframe, we arranged it in descending order. We chose to only show the top ten candidates in order to make our graph more digestible and less overwhelming. From this data we can see which candidate got the most contributions and which state that candidate came from during the 2011-2012 election cycle. 
+During the 2011-2012 election cycle, the candidates for the House elections that received the most contributions received a grand total in the millions with Mark Critz from Pennsylvania bringing in around 7 million dollars. The other top candidates from a variety of states all brought in just under 6 million dollars. Since this graphic looks at such a small sample size, we cannot find a correlation between where the candidate comes from and how much money they raise. Although almost a third of the candidates here come from Illinois and a fifth come from Ohio. 
 
 ```{r, message=FALSE, warning=FALSE}
 # what we want from candidates
@@ -108,7 +104,7 @@ candVs.Money <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandCon
 candVs.Money
 ```
 
-This data graphic would be a good comparison to the last one in order to see how many votes each candidate got in comparison to the amount of money was spent on them. This data is for the same 10 candidates as in the previous graphic. These two data graphics are meant to help us try to find a possible correlation between the amount of money contributed to campaign (either for it or against it) and its effect on the number of general votes. For example, if a candidate has had more money spent on them but, fewer general votes, then maybe we can infer that the money spent was used against their campaign (ex. For a negative ad against a candidate that, in turn, influenced voters).   
+Next let’s see if there’s a correlation between the amount of money spent on the candidate and the votes they receive during the election. Only two of the top ten fundraisers won their elections. This data graphic brings in an important point of information about money raised during campaigns. The Federal Election Commission only records the money spent on a candidate, not whether that money is used for or against that candidate. Since eight of the ten candidates lost their election, it could be assumed that a lot of that money was used against them, or the candidate was a lost cause, no amount of money would guarantee their win. To be sure, more context about this election cycle and candidate popularity would be required.  
 
 ```{r, message=FALSE, warning=FALSE}
 candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)", "Loss/Win") +
@@ -119,7 +115,7 @@ candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandCont
 candVs.Vote
 ```
 
-Our third graphic displays the total number of contributions that the same top ten candidates received. In the graphic we separate the number of contributions that each candidate received by where the contribution came from as described above. We also separated the candidates by which party they are affiliated with in order to see if there’s a correlation between how many contributions they received, where those contributions came from, and what party the candidate is affiliated with. From this data graphic, we can see that the majority of the contributions a candidate receives is not affiliated with a major party and that a candidate receives more contributions from the party it’s affiliated with than the opposing party.
+Where these contributions are coming from is important when determining if the money was used against or for a candidate. In the next data graphic, the number of contributions each of the ten candidates received are separated out by which organization they came from, their own party, the opposing party, or other (another party or an independent organization). The majority of contributions candidates received are from a committee not affiliated with a major party which makes it hard to learn their motive. Also, all the Republican candidates received around the same number of contributions from a committee affiliated with the Republican party.
 
 ```{r, message=FALSE, warning=FALSE, fig.width= 50, fig.height= 25}
 # candVs.Contribution <- graph(houseCandContrib$contributionParty, houseCandContrib$candidateParty, "Total Number of Contributions")
@@ -192,4 +188,6 @@ grid.arrange(
   ncol = 2
 ))
 ```
+Breaking down the influences of a political election is complicated. Many factors contribute to which candidate wins an election, with the amount of money funnelling into each candidate’s campaign only being one of them. These data graphics attempt break down how money can alter the outcome an election. Although a lot of money can be raised for a candidate, in end, it might not matter. 7 million dollars was spent on Mark Critz, but it all went to waste in the end.
+
 ^[https://github.com/lolabfr/sds192-mp2.git]
