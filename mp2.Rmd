@@ -5,13 +5,15 @@ date: "March 22, 2018"
 output:
   html_document:
     code_folding: hide
+    
 ---
 
-For this project, we analyzed the FEC data files for the 2011-2012 election cycle. We used information about the candidates, contributions, house elections, and committees to create a visualization about how much money was spent on candidates overall during this cycle, we then used another graphic to compare how many votes the candidates received and whether or not they won the general vote. All of this only applies to the ten candidates with the most money spent on them. These graphics can serve as a visualization for the amount of money spent on candidates and the amount of votes/wins a candidate received in this particular election cycle. 
+For this project, we analyzed the FEC data files for the 2011-2012 election cycle. We used information about the candidates, contributions, house elections, and committees to create a visualization about how much money was spent on candidates overall during this cycle. We then use another graphic to visualize where that money came from, an organization affiliated with the democratic party, the republican party, or other (another party or an organization not associated with a party). For these visualizations, we have used the ten candidates that have had the most money spent on them in the House elections during this cycle.
 
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(gridExtra)
 ```
 
 ```{r, message=FALSE, warning=FALSE}
@@ -21,7 +23,11 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-This data may be misleading because we have summed all of the money spent candidates without a distinction of whether the contribution was for or against them. We found the total amount of money spent on each candidate by joining together the candidates dataset and contributions dataset (full_join). Before joining we selected columns from each dataset with relevant information and to speed up the joining process as to not overload the RStudio system. Once we joined them, we filtered out all of the information with NA to make our dataset more clear and easier to understand, from there we grouped by candidate name and state so that we could see the total amount they received. We proceeded to see the candidates that got the largest amount of contributions first by arranging in descending order, our dataset only shows the top ten to make a more readable graph. From this data we can see which candidate got the most contributions and which state that candidate came from. All of the data is for the 2011-2012 election cycle. 
+The first graphic shows the total contributions (in millions of dollars) that a candidate received and also shows the state where the candidate is from. We found the total amount of money spent on each candidate by joining together the candidates dataset and contributions dataset (full_join).
+
+This data may be misleading because we have summed all of the money spent candidates without a distinction of whether the contribution was used for or against them. 
+
+Before joining we selected columns from each dataset with relevant information and to speed up the joining process as to not overload the RStudio system. Once we joined them, we filtered out all of the information with NA to make our dataset more clear and easier to understand. From there we grouped by candidate name and state so that we could see the total amount they received. In order to see the candidate that received the largest total amount of contributions at the top of the dataframe, we arranged it in descending order. We chose to only show the top ten candidates in order to make our graph more digestible and less overwhelming. From this data we can see which candidate got the most contributions and which state that candidate came from during the 2011-2012 election cycle. 
 
 ```{r, message=FALSE, warning=FALSE}
 # what we want from candidates
@@ -101,7 +107,7 @@ candVs.Money <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandCon
 candVs.Money
 ```
 
-This data graphic would be a good comparison to the last one in order to see how many votes each candidate got in comparison to the amount of money was spent on them. This data is for the same 10 candidates as in the previous graphic. These two data graphics are meant help us try to find a possible correlation between the amount of money contributed to campaign (either for it or against it) and its effect on the number of general votes. For example, if a candidate has had more money spent on them but, fewer general votes, then maybe we can infer that the money spent was used against their campaign (ex. For a negative ad against a candidate that in turn influenced voters)  
+This data graphic would be a good comparison to the last one in order to see how many votes each candidate got in comparison to the amount of money was spent on them. This data is for the same 10 candidates as in the previous graphic. These two data graphics are meant to help us try to find a possible correlation between the amount of money contributed to campaign (either for it or against it) and its effect on the number of general votes. For example, if a candidate has had more money spent on them but, fewer general votes, then maybe we can infer that the money spent was used against their campaign (ex. For a negative ad against a candidate that, in turn, influenced voters).   
 
 ```{r, message=FALSE, warning=FALSE}
 candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)") +
@@ -112,7 +118,9 @@ candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandCont
 candVs.Vote
 ```
 
-```{r}
+Our third graphic displays the total number of contributions that the same top ten candidates received. In the graphic we separate the number of contributions that each candidate received by where the contribution came from as described above. We also separated the candidates by which party they are affiliated with in order to see if there’s a correlation between how many contributions they received, where those contributions came from, and what party the candidate is affiliated with. From this data graphic, we can see that the majority of the contributions a candidate receives is not affiliated with a major party and that a candidate receives more contributions from the party it’s affiliated with than the opposing party.
+
+```{r, message=FALSE, warning=FALSE}
 # candVs.Contribution <- graph(houseCandContrib$contributionParty, houseCandContrib$candidateParty, "Total Number of Contributions")
 # 
 # candVs.Contribution
@@ -132,15 +140,37 @@ candParty <- houseCandContrib %>%
 
 party = data_frame(Democratic, Republican, Other, candidateName, candidateParty)
 
-party <- party %>%
-  gather(party, numberOfContributions, -candidateName, -candidateParty) 
+canDemParty <- party %>%
+  gather(party, numberOfContributions, -candidateName, -candidateParty) %>%
+  filter(candidateParty == "D")
 
 # creating the bar graph for candidates vs. the party they recieved money from
 
-candVs.Contribution <- graph(party, party$candidateName, party$numberOfContributions, party$party, "Number of Contributions") + 
-  ggtitle("Candidate vs. Number of Contributions By Party")
-candVs.Contribution
+candDemVs.Contribution <- graph(canDemParty, canDemParty$candidateName, canDemParty$numberOfContributions, canDemParty$party, "Number of Contributions") + 
+  ggtitle("Democatic Candidate vs.\n Number of Contributions By Party") + 
+  scale_fill_manual(values=c(Democratic="blue", Republican="red", Other = "grey")) + 
+  theme(legend.position="none")
+
+# candDemVs.Contribution
 
 
+canRepParty <- party %>%
+  gather(party, numberOfContributions, -candidateName, -candidateParty) %>%
+  filter(candidateParty == "R")
+
+candRepVs.Contribution <- graph(canRepParty, canRepParty$candidateName, canRepParty$numberOfContributions, canRepParty$party, "") + 
+  ggtitle("Republican Candidate vs.\n Number of Contributions By Party") + 
+  scale_fill_manual(values=c(Democratic="blue", Republican="red", Other = "grey")) + 
+  scale_y_continuous(breaks = c(0, 500, 1000, 1500, 2000))
+
+# candRepVs.Contribution
+
+grid.arrange(
+  arrangeGrob(
+  candDemVs.Contribution,
+  candRepVs.Contribution,
+  nrow = 1,
+  ncol = 2
+))
 ```
-
+^[https://github.com/lolabfr/sds192-mp2.git]
