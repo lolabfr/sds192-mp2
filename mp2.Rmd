@@ -8,7 +8,7 @@ output:
     
 ---
 
-The amount of money a candidate’s campaign receives may widely influence whether they win or lose the election. Campaign fundraising has become such a large part of the democratic process that candidates running for high office must spend the majority of their time in office just raising money for their re-election. Contributions have gotten so out of hand that the Federal Election Commission has had to limit the amount of money people can contribute in order to strive for a level playing field. How much money do candidates actually receive and will large amounts of money swing the outcome of an election? Also how far will the other party go in terms of spending money against an opposing candidate?
+The amount of money a candidate’s campaign receives may widely influence whether they win or lose an election. Campaign fundraising has become a significant part of the democratic process, candidates running for high office must spend the majority of their time raising money for re-election. Candidates receive such a high volume of contributions that the Federal Election Commission has had to limit the amount of money people/organizations can contribute in order to strive for a more level playing field. How much money do candidates actually receive and will large amounts of money swing the outcome of an election? Also, how far will the other party go in terms of spending money against an opposing candidate?
 
 ```{r, message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -23,7 +23,7 @@ load("committees.rda")
 load("contributions.rda")
 ```
 
-During the 2011-2012 election cycle, the candidates for the House elections that received the most contributions received a grand total in the millions with Mark Critz from Pennsylvania bringing in around 7 million dollars. The other top candidates from a variety of states all brought in just under 6 million dollars. Since this graphic looks at such a small sample size, we cannot find a correlation between where the candidate comes from and how much money they raise. Although almost a third of the candidates here come from Illinois and a fifth come from Ohio. 
+During the 2011-2012 election cycle, the House Elections candidates who received the most contributions received a grand total in the millions of dollars, with Mark Critz (Pennsylvania) bringing in around 7 million dollars alone. The other top candidates from a variety of states all brought in just under 6 million dollars. Since this graphic looks at a small sample size, we cannot find a correlation between where the candidate comes from and how much money they raise. Although almost a third of the candidates in the graphic come from Illinois and a fifth come from Ohio. 
 
 ```{r, message=FALSE, warning=FALSE}
 # what we want from candidates
@@ -104,7 +104,7 @@ candVs.Money <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandCon
 candVs.Money
 ```
 
-Next let’s see if there’s a correlation between the amount of money spent on the candidate and the votes they receive during the election. Only two of the top ten fundraisers won their elections. This data graphic brings in an important point of information about money raised during campaigns. The Federal Election Commission only records the money spent on a candidate, not whether that money is used for or against that candidate. Since eight of the ten candidates lost their election, it could be assumed that a lot of that money was used against them, or the candidate was a lost cause, no amount of money would guarantee their win. To be sure, more context about this election cycle and candidate popularity would be required.  
+Next let’s see if there’s a correlation between the amount of money spent on the candidate and the votes they receive during the election. Only two of the top ten fundraiser candidates won their elections. This data graphic brings in an important point of information about money raised during campaigns. The Federal Election Commission only records the money spent on a candidate, not whether that money is used for or against that candidate. (Ex: In an advertisement denouncing the candidate) Since eight of the ten candidates lost their election, it could be assumed that a significant portion of that money was used against them, or that the candidate was a lost cause, no amount of money would guarantee their win. To be sure, more context about this election cycle and candidate popularity would be required. 
 
 ```{r, message=FALSE, warning=FALSE}
 candVs.Vote <- graph(houseCandContrib, houseCandContrib$cand_name, houseCandContrib$general_votes, houseCandContrib$ge_winner, "General Votes\n(Hundreds of Millions)", "Loss/Win") +
@@ -188,6 +188,7 @@ grid.arrange(
   ncol = 2
 ))
 ```
-Breaking down the influences of a political election is complicated. Many factors contribute to which candidate wins an election, with the amount of money funnelling into each candidate’s campaign only being one of them. These data graphics attempt break down how money can alter the outcome an election. Although a lot of money can be raised for a candidate, in end, it might not matter. 7 million dollars was spent on Mark Critz, but it all went to waste in the end.
+Breaking down the influences of a political election is complicated. Many factors contribute to which candidate wins an election, and the amount of money spent on each candidate or their campaign only being one of them. These data graphics attempt break down how money can alter the outcome an election. Although a lot of money can be raised for a candidate, in end, it might not matter. For example, 7 million dollars was spent on Mark Critz, but it all went to waste in the end since he did not win.
+
 
 ^[https://github.com/lolabfr/sds192-mp2.git]
